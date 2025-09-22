@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Problems with Java, Python, and C#</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #005f73;
+            color: #fff;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        section {
+            background-color: #fff;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #0077b6;
+            margin-top: 0;
+        }
+
+        .toggle-btn, .lang-btn {
+            background-color: #0077b6;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .toggle-btn:hover, .lang-btn:hover {
+            background-color: #005f73;
+        }
+        
+        .lang-btn.active {
+            background-color: #004d66;
+        }
+
+        .solution-container {
+            margin-top: 1rem;
+            transition: all 0.3s ease-in-out;
+            max-height: 1000px;
+            overflow: hidden;
+            border-left: 3px solid #0077b6;
+            padding-left: 1rem;
+        }
+        
+        .solution-container.hidden {
+            max-height: 0;
+            padding: 0;
+            border: none;
+            opacity: 0;
+            margin: 0;
+        }
+
+        pre {
+            background-color: #2d2d2d;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .code-container {
+            display: none;
+        }
+
+        .code-container.visible {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #005f73;
+            color: #fff;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Array Problems with Java, Python, and C#</h1>
+        <p>A collection of common array problems with code examples.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Find Smallest and Largest Number</h2>
+            <p>Finds the minimum and maximum values in a given array of integers.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.Arrays;
+public class ArrayProblems {
+    public static void findMinMax(int[] arr) {
+        if (arr == null || arr.length == 0) {
+            System.out.println("Array is empty or null.");
+            return;
+        }
+        int min = arr[0];
+        int max = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] < min) { min = arr[i]; }
+            if (arr[i] > max) { max = arr[i]; }
+        }
+        System.out.println("Smallest: " + min);
+        System.out.println("Largest: " + max);
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {5, 8, 2, 10, 3};
+        findMinMax(numbers);
+        // Output:
+        // Smallest: 2
+        // Largest: 10
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def find_min_max(arr):
+    if not arr:
+        print("Array is empty.")
+        return
+    min_val = arr[0]
+    max_val = arr[0]
+    for num in arr[1:]:
+        if num < min_val: min_val = num
+        if num > max_val: max_val = num
+    print(f"Smallest: {min_val}")
+    print(f"Largest: {max_val}")
+
+# Example
+# Input:
+numbers = [5, 8, 2, 10, 3]
+find_min_max(numbers)
+# Output:
+# Smallest: 2
+# Largest: 10
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static void FindMinMax(int[] arr) {
+        if (arr == null || arr.Length == 0) {
+            Console.WriteLine("Array is empty or null.");
+            return;
+        }
+        int min = arr.Min();
+        int max = arr.Max();
+        Console.WriteLine($"Smallest: {min}");
+        Console.WriteLine($"Largest: {max}");
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {5, 8, 2, 10, 3};
+        FindMinMax(numbers);
+        // Output:
+        // Smallest: 2
+        // Largest: 10
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>2. Find Missing Number in a Shuffled Array</h2>
+            <p>Finds the single missing number in an array of consecutive integers from 1 to N.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+public class ArrayProblems {
+    public static int findMissingNumber(int[] arr) {
+        int n = arr.length + 1;
+        int expectedSum = n * (n + 1) / 2;
+        int actualSum = 0;
+        for (int num : arr) { actualSum += num; }
+        return expectedSum - actualSum;
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 2, 4, 5, 6};
+        // Output:
+        System.out.println("Missing number: " + findMissingNumber(numbers));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def find_missing_number(arr):
+    n = len(arr) + 1
+    expected_sum = n * (n + 1) // 2
+    actual_sum = sum(arr)
+    return expected_sum - actual_sum
+
+# Example
+# Input:
+numbers = [1, 2, 4, 5, 6]
+# Output:
+print(f"Missing number: {find_missing_number(numbers)}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static int FindMissingNumber(int[] arr) {
+        int n = arr.Length + 1;
+        int expectedSum = n * (n + 1) / 2;
+        int actualSum = arr.Sum();
+        return expectedSum - actualSum;
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 2, 4, 5, 6};
+        // Output:
+        Console.WriteLine($"Missing number: {FindMissingNumber(numbers)}");
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>3. Find Second Largest Number</h2>
+            <p>Identifies the second largest value in an array in a single pass.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+public class ArrayProblems {
+    public static int findSecondLargest(int[] arr) {
+        if (arr == null || arr.length < 2) { return -1; }
+        int largest = Integer.MIN_VALUE;
+        int secondLargest = Integer.MIN_VALUE;
+        for (int num : arr) {
+            if (num > largest) {
+                secondLargest = largest;
+                largest = num;
+            } else if (num > secondLargest && num != largest) {
+                secondLargest = num;
+            }
+        }
+        return secondLargest;
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {12, 35, 1, 10, 34, 1};
+        // Output:
+        System.out.println("Second largest: " + findSecondLargest(numbers));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def find_second_largest(arr):
+    if len(arr) < 2: return -1
+    largest = float('-inf')
+    second_largest = float('-inf')
+    for num in arr:
+        if num > largest:
+            second_largest = largest
+            largest = num
+        elif num > second_largest and num != largest:
+            second_largest = num
+    return second_largest
+
+# Example
+# Input:
+numbers = [12, 35, 1, 10, 34, 1]
+# Output:
+print(f"Second largest: {find_second_largest(numbers)}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+public class ArrayProblems {
+    public static int FindSecondLargest(int[] arr) {
+        if (arr == null || arr.Length < 2) { return -1; }
+        int largest = int.MinValue;
+        int secondLargest = int.MinValue;
+        foreach (int num in arr) {
+            if (num > largest) {
+                secondLargest = largest;
+                largest = num;
+            } else if (num > secondLargest && num != largest) {
+                secondLargest = num;
+            }
+        }
+        return secondLargest;
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {12, 35, 1, 10, 34, 1};
+        // Output:
+        Console.WriteLine($"Second largest: {FindSecondLargest(numbers)}");
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>4. Re-arranged Array by Small-Large Combination</h2>
+            <p>Sorts an array and then prints it by alternating the smallest and largest elements.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.Arrays;
+public class ArrayProblems {
+    public static void printSmallLargeCombination(int[] arr) {
+        Arrays.sort(arr);
+        int i = 0;
+        int j = arr.length - 1;
+        while (i <= j) {
+            if (i == j) { System.out.print(arr[i] + " "); }
+            else { System.out.print(arr[i] + " " + arr[j] + " "); }
+            i++;
+            j--;
+        }
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 2, 3, 4, 5, 6};
+        // Output:
+        printSmallLargeCombination(numbers);
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def print_small_large_combination(arr):
+    arr.sort()
+    i, j = 0, len(arr) - 1
+    while i <= j:
+        if i == j: print(arr[i], end=" ")
+        else: print(arr[i], arr[j], end=" ")
+        i += 1
+        j -= 1
+
+# Example
+# Input:
+numbers = [1, 2, 3, 4, 5, 6]
+# Output:
+print_small_large_combination(numbers)
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+public class ArrayProblems {
+    public static void PrintSmallLargeCombination(int[] arr) {
+        Array.Sort(arr);
+        int i = 0;
+        int j = arr.Length - 1;
+        while (i <= j) {
+            if (i == j) { Console.Write(arr[i] + " "); }
+            else { Console.Write(arr[i] + " " + arr[j] + " "); }
+            i++; j--;
+        }
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 2, 3, 4, 5, 6};
+        // Output:
+        PrintSmallLargeCombination(numbers);
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>5. Max Contiguous Sequence</h2>
+            <p>Finds the maximum sum of a contiguous sub-array (Kadane's algorithm).</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+public class ArrayProblems {
+    public static int maxContiguousSequenceSum(int[] arr) {
+        int maxSoFar = Integer.MIN_VALUE;
+        int maxEndingHere = 0;
+        for (int num : arr) {
+            maxEndingHere += num;
+            if (maxSoFar < maxEndingHere) { maxSoFar = maxEndingHere; }
+            if (maxEndingHere < 0) { maxEndingHere = 0; }
+        }
+        return maxSoFar;
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {-2, -3, 4, -1, -2, 1, 5, -3};
+        // Output:
+        System.out.println("Max sum: " + maxContiguousSequenceSum(numbers));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def max_contiguous_sequence_sum(arr):
+    max_so_far = float('-inf')
+    max_ending_here = 0
+    for num in arr:
+        max_ending_here += num
+        if max_so_far < max_ending_here: max_so_far = max_ending_here
+        if max_ending_here < 0: max_ending_here = 0
+    return max_so_far
+
+# Example
+# Input:
+numbers = [-2, -3, 4, -1, -2, 1, 5, -3]
+# Output:
+print(f"Max sum: {max_contiguous_sequence_sum(numbers)}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+public class ArrayProblems {
+    public static int MaxContiguousSequenceSum(int[] arr) {
+        int maxSoFar = int.MinValue;
+        int maxEndingHere = 0;
+        foreach (int num in arr) {
+            maxEndingHere += num;
+            if (maxSoFar < maxEndingHere) { maxSoFar = maxEndingHere; }
+            if (maxEndingHere < 0) { maxEndingHere = 0; }
+        }
+        return maxSoFar;
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {-2, -3, 4, -1, -2, 1, 5, -3};
+        // Output:
+        Console.WriteLine($"Max sum: {MaxContiguousSequenceSum(numbers)}");
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>6. Print the Most Repeated Number</h2>
+            <p>Counts frequencies to find the number that appears most often.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.HashMap;
+import java.util.Map;
+public class ArrayProblems {
+    public static int findMostRepeated(int[] arr) {
+        Map<Integer, Integer> frequencyMap = new HashMap<>();
+        for (int num : arr) {
+            frequencyMap.put(num, frequencyMap.getOrDefault(num, 0) + 1);
+        }
+        int mostRepeated = -1;
+        int maxCount = 0;
+        for (Map.Entry<Integer, Integer> entry : frequencyMap.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxCount = entry.getValue();
+                mostRepeated = entry.getKey();
+            }
+        }
+        return mostRepeated;
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 2, 2, 3, 3, 3, 4, 5};
+        // Output:
+        System.out.println("Most repeated: " + findMostRepeated(numbers));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+from collections import Counter
+def find_most_repeated(arr):
+    if not arr: return None
+    counts = Counter(arr)
+    return max(counts, key=counts.get)
+
+# Example
+# Input:
+numbers = [1, 2, 2, 3, 3, 3, 4, 5]
+# Output:
+print(f"Most repeated: {find_most_repeated(numbers)}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static int FindMostRepeated(int[] arr) {
+        if (arr == null || arr.Length == 0) { return -1; }
+        return arr.GroupBy(x => x).OrderByDescending(g => g.Count()).First().Key;
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 2, 2, 3, 3, 3, 4, 5};
+        // Output:
+        Console.WriteLine($"Most repeated: {FindMostRepeated(numbers)}");
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>7. Print All Unique Elements</h2>
+            <p>Uses a set to get a collection of unique numbers.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.HashSet;
+import java.util.Set;
+public class ArrayProblems {
+    public static void printUniqueElements(int[] arr) {
+        Set<Integer> uniqueElements = new HashSet<>();
+        for (int num : arr) { uniqueElements.add(num); }
+        System.out.println(uniqueElements);
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 2, 2, 3, 4, 4, 5};
+        // Output:
+        System.out.print("Unique elements: ");
+        printUniqueElements(numbers);
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def print_unique_elements(arr):
+    unique_elements = set(arr)
+    print(list(unique_elements))
+
+# Example
+# Input:
+numbers = [1, 2, 2, 3, 4, 4, 5]
+# Output:
+print("Unique elements: ", end="")
+print_unique_elements(numbers)
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static void PrintUniqueElements(int[] arr) {
+        var uniqueElements = arr.Distinct().ToList();
+        Console.WriteLine(string.Join(", ", uniqueElements));
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 2, 2, 3, 4, 4, 5};
+        // Output:
+        Console.Write("Unique elements: ");
+        PrintUniqueElements(numbers);
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>8. Rotate an Array by 'N' Positions</h2>
+            <p>Rotates the array elements by a specified number of positions.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.Arrays;
+public class ArrayProblems {
+    public static void rotateArray(int[] arr, int n) {
+        n = n % arr.length;
+        if (n < 0) { n += arr.length; }
+        int[] temp = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            temp[(i + n) % arr.length] = arr[i];
+        }
+        System.arraycopy(temp, 0, arr, 0, arr.length);
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 2, 3, 4, 5, 6, 7};
+        int n = 3;
+        rotateArray(numbers, n);
+        // Output:
+        System.out.println("Rotated array: " + Arrays.toString(numbers));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def rotate_array(arr, n):
+    n = n % len(arr)
+    return arr[-n:] + arr[:-n]
+
+# Example
+# Input:
+numbers = [1, 2, 3, 4, 5, 6, 7]
+n = 3
+rotated = rotate_array(numbers, n)
+# Output:
+print(f"Rotated array: {rotated}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static void RotateArray(int[] arr, int n) {
+        n = n % arr.Length;
+        if (n < 0) { n += arr.Length; }
+        Array.Reverse(arr);
+        Array.Reverse(arr, 0, n);
+        Array.Reverse(arr, n, arr.Length - n);
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 2, 3, 4, 5, 6, 7};
+        int n = 3;
+        RotateArray(numbers, n);
+        // Output:
+        Console.WriteLine("Rotated array: " + string.Join(", ", numbers));
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>9. Remove All Duplicates</h2>
+            <p>Creates a new array containing only the unique elements from the original.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+public class ArrayProblems {
+    public static int[] removeDuplicates(int[] arr) {
+        Set<Integer> uniqueElements = new HashSet<>();
+        for (int num : arr) { uniqueElements.add(num); }
+        int[] result = new int[uniqueElements.size()];
+        int i = 0;
+        for (int num : uniqueElements) { result[i++] = num; }
+        return result;
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 2, 2, 3, 4, 4, 5};
+        int[] uniqueArray = removeDuplicates(numbers);
+        // Output:
+        System.out.println("Array without duplicates: " + Arrays.toString(uniqueArray));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def remove_duplicates(arr):
+    return list(dict.fromkeys(arr))
+
+# Example
+# Input:
+numbers = [1, 2, 2, 3, 4, 4, 5]
+unique_arr = remove_duplicates(numbers)
+# Output:
+print(f"Array without duplicates: {unique_arr}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static int[] RemoveDuplicates(int[] arr) {
+        return arr.Distinct().ToArray();
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 2, 2, 3, 4, 4, 5};
+        int[] uniqueArray = RemoveDuplicates(numbers);
+        // Output:
+        Console.WriteLine("Array without duplicates: " + string.Join(", ", uniqueArray));
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>10. Move all 0s to the end of an array</h2>
+            <p>Moves all zeros to the end of the array while maintaining the relative order of non-zero elements.</p>
+            <button class="toggle-btn">Show Solution</button>
+            <div class="solution-container hidden">
+                <button class="lang-btn active" data-lang="java">Java</button>
+                <button class="lang-btn" data-lang="python">Python</button>
+                <button class="lang-btn" data-lang="csharp">C#</button>
+                <div class="code-container visible" data-lang="java">
+                    <pre><code>
+// Java Solution
+import java.util.Arrays;
+public class ArrayProblems {
+    public static void moveZeros(int[] arr) {
+        int nonZeroIndex = 0;
+        for (int num : arr) {
+            if (num != 0) {
+                arr[nonZeroIndex++] = num;
+            }
+        }
+        while (nonZeroIndex < arr.length) {
+            arr[nonZeroIndex++] = 0;
+        }
+    }
+    public static void main(String[] args) {
+        // Input:
+        int[] numbers = {1, 0, 2, 0, 3, 0, 4};
+        moveZeros(numbers);
+        // Output:
+        System.out.println("Array with zeros moved: " + Arrays.toString(numbers));
+    }
+}
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="python">
+                    <pre><code>
+# Python Solution
+def move_zeros(arr):
+    non_zero_index = 0
+    for num in arr:
+        if num != 0:
+            arr[non_zero_index] = num
+            non_zero_index += 1
+    while non_zero_index < len(arr):
+        arr[non_zero_index] = 0
+        non_zero_index += 1
+
+# Example
+# Input:
+numbers = [1, 0, 2, 0, 3, 0, 4]
+move_zeros(numbers)
+# Output:
+print(f"Array with zeros moved: {numbers}")
+                    </code></pre>
+                </div>
+                <div class="code-container" data-lang="csharp">
+                    <pre><code>
+// C# Solution
+using System;
+using System.Linq;
+public class ArrayProblems {
+    public static void MoveZeros(int[] arr) {
+        int nonZeroIndex = 0;
+        foreach (int num in arr) {
+            if (num != 0) {
+                arr[nonZeroIndex++] = num;
+            }
+        }
+        while (nonZeroIndex < arr.Length) {
+            arr[nonZeroIndex++] = 0;
+        }
+    }
+    public static void Main(string[] args) {
+        // Input:
+        int[] numbers = {1, 0, 2, 0, 3, 0, 4};
+        MoveZeros(numbers);
+        // Output:
+        Console.WriteLine("Array with zeros moved: " + string.Join(", ", numbers));
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Array Solutions. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            const langButtons = document.querySelectorAll('.lang-btn');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const solutionContainer = this.nextElementSibling;
+                    solutionContainer.classList.toggle('hidden');
+                    this.textContent = solutionContainer.classList.contains('hidden') ? 'Show Solution' : 'Hide Solution';
+                });
+            });
+
+            langButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const parentContainer = this.closest('.solution-container');
+                    const lang = this.getAttribute('data-lang');
+
+                    // Deactivate all lang buttons and hide all code containers in this section
+                    parentContainer.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+                    parentContainer.querySelectorAll('.code-container').forEach(code => code.classList.remove('visible'));
+
+                    // Activate the clicked button and show the corresponding code container
+                    this.classList.add('active');
+                    parentContainer.querySelector(`.code-container[data-lang="${lang}"]`).classList.add('visible');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
