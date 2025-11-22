@@ -1,0 +1,28 @@
+name: Daily README Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'      # Runs daily at 00:00 UTC
+  workflow_dispatch:        # Allows manual trigger too
+
+jobs:
+  update_readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Update README timestamp
+        run: |
+          echo "## Last updated: $(date -u +"%Y-%m-%d %H:%M UTC")" > README.md
+          echo "" >> README.md
+          echo "_This file is auto-updated once daily._" >> README.md
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "madhiremohanreddy@gmail.com"
+          git config --local user.name "ComradeMohan"
+          git add README.md
+          git commit -m "Daily auto-update: $(date -u +"%Y-%m-%d")" || echo "No changes to commit"
+          git push
