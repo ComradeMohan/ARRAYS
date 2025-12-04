@@ -1,28 +1,37 @@
-name: Daily README Update
+name: Daily Random Commits
 
 on:
   schedule:
-    - cron: '0 0 * * *'      # Runs daily at 00:00 UTC
-  workflow_dispatch:        # Allows manual trigger too
+    - cron: "0 0 * * *"   # Runs at start of every UTC day
+  workflow_dispatch:
 
 jobs:
-  update_readme:
+  random_commits:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Update README timestamp
+      - name: Pick Random Commit Count
+        id: rnum
         run: |
-          echo "## Last updated: $(date -u +"%Y-%m-%d %H:%M UTC")" > README.md
-          echo "" >> README.md
-          echo "_This file is auto-updated once daily._" >> README.md
+          # Between 3 and 18 commits per day
+          COMMITS=$(( (RANDOM % 16) + 3 ))
+          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+          echo "Will make $COMMITS commits today"
 
-      - name: Commit and push changes
+      - name: Perform Random Commits
         run: |
           git config --local user.email "madhiremohanreddy@gmail.com"
           git config --local user.name "ComradeMohan"
-          git add README.md
-          git commit -m "Daily auto-update: $(date -u +"%Y-%m-%d")" || echo "No changes to commit"
-          git push
+
+          for ((i=1; i<=${{ steps.rnum.outputs.commits }}; i++)); do
+            echo "Commit number $i at $(date -u)" > daily_log.txt
+
+            git add daily_log.txt
+            git commit -m "Auto commit $i on $(date -u +"%Y-%m-%d")"
+          done
+
+      - name: Push Commits
+        run: git push
