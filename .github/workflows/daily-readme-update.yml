@@ -1,37 +1,120 @@
-name: Daily Random Commits
+name: Ultimate Daily Heatmap Generator
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # Runs at start of every UTC day
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
-  random_commits:
+  generate_heatmap:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Pick Random Commit Count
-        id: rnum
+      - name: Detect date, season, weekday
+        id: dateinfo
         run: |
-          # Between 3 and 18 commits per day
-          COMMITS=$(( (RANDOM % 16) + 3 ))
-          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
-          echo "Will make $COMMITS commits today"
+          MONTH=$(date -u +"%m")
+          WEEKDAY=$(date -u +"%u")   # 1=Mon ... 7=Sun
+          
+          # Determine season
+          if [ $MONTH -ge 12 ] || [ $MONTH -le 2 ]; then
+            SEASON="winter"
+          elif [ $MONTH -ge 3 ] && [ $MONTH -le 5 ]; then
+            SEASON="spring"
+          elif [ $MONTH -ge 6 ] && [ $MONTH -le 8 ]; then
+            SEASON="summer"
+          else
+            SEASON="autumn"
+          fi
 
-      - name: Perform Random Commits
+          echo "season=$SEASON" >> $GITHUB_OUTPUT
+          echo "weekday=$WEEKDAY" >> $GITHUB_OUTPUT
+          echo "month=$MONTH" >> $GITHUB_OUTPUT
+
+      - name: Select Mode (Seasonal / Pixel-Art / Weighted)
+        id: mode
+        run: |
+          RAND=$(( RANDOM % 100 ))
+
+          if [ $RAND -lt 5 ]; then
+            MODE="pixelart"
+          elif [ $RAND -lt 20 ]; then
+            MODE="seasonal"
+          else
+            MODE="weighted"
+          fi
+
+          echo "mode=$MODE" >> $GITHUB_OUTPUT
+          echo "Selected: $MODE"
+
+      - name: Determine commit count
+        id: commits
+        run: |
+          MODE=${{ steps.mode.outputs.mode }}
+          SEASON=${{ steps.dateinfo.outputs.season }}
+          WEEKDAY=${{ steps.dateinfo.outputs.weekday }}
+
+          # If pixel-art day → fixed patterns
+          if [ "$MODE" = "pixelart" ]; then
+            # Heart pattern intensity
+            COMMITS=$(( RANDOM % 8 + 20 )) # 20–28 darker
+            echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Seasonal modes (light/dark patterns)
+          if [ "$MODE" = "seasonal" ]; then
+            if [ "$SEASON" = "winter" ]; then
+              MIN=1; MAX=10     # light winter theme
+            elif [ "$SEASON" = "summer" ]; then
+              MIN=10; MAX=35    # bright & active
+            elif [ "$SEASON" = "autumn" ]; then
+              MIN=5; MAX=20
+            else
+              MIN=7; MAX=15
+            fi
+
+            COMMITS=$(( RANDOM % (MAX - MIN + 1) + MIN ))
+            echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Weighted randomness (MOST DAYS)
+          WEIGHT=$(( RANDOM % 100 ))
+
+          if [ $WEIGHT -lt 60 ]; then
+            MIN=1; MAX=5
+          elif [ $WEIGHT -lt 85 ]; then
+            MIN=6; MAX=12
+          elif [ $WEIGHT -lt 95 ]; then
+            MIN=13; MAX=20
+          else
+            MIN=21; MAX=30
+          fi
+
+          # Weekly theme modifier
+          if [ "$WEEKDAY" -eq 1 ]; then MIN=1; MAX=5; fi
+          if [ "$WEEKDAY" -eq 5 ]; then MIN=$((MIN+5)); MAX=$((MAX+10)); fi
+
+          COMMITS=$(( RANDOM % (MAX - MIN + 1) + MIN ))
+
+          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+          echo "Will make $COMMITS commits"
+
+      - name: Perform Commits
         run: |
           git config --local user.email "madhiremohanreddy@gmail.com"
           git config --local user.name "ComradeMohan"
 
-          for ((i=1; i<=${{ steps.rnum.outputs.commits }}; i++)); do
-            echo "Commit number $i at $(date -u)" > daily_log.txt
+          TOTAL=${{ steps.commits.outputs.commits }}
 
-            git add daily_log.txt
-            git commit -m "Auto commit $i on $(date -u +"%Y-%m-%d")"
+          for ((i=1; i<=TOTAL; i++)); do
+            echo "Commit $i - $(date -u)" > activity_log.txt
+            git add activity_log.txt
+            git commit -m "Commit $i for heatmap on $(date -u +'%Y-%m-%d')"
           done
 
-      - name: Push Commits
+      - name: Push
         run: git push
