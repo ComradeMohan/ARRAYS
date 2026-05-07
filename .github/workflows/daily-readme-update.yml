@@ -1,5 +1,4 @@
 name: Ultimate Daily Heatmap Generator
-
 on:
   schedule:
     - cron: "0 0 * * *"
@@ -8,7 +7,6 @@ on:
 jobs:
   generate_heatmap:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
@@ -16,38 +14,25 @@ jobs:
         id: dateinfo
         run: |
           MONTH=$(date -u +"%m")
-          WEEKDAY=$(date -u +"%u")   # 1=Mon ... 7=Sun
-          
-          # Determine season
-          if [ $MONTH -ge 12 ] || [ $MONTH -le 2 ]; then
-            SEASON="winter"
-          elif [ $MONTH -ge 3 ] && [ $MONTH -le 5 ]; then
-            SEASON="spring"
-          elif [ $MONTH -ge 6 ] && [ $MONTH -le 8 ]; then
-            SEASON="summer"
-          else
-            SEASON="autumn"
-          fi
+          WEEKDAY=$(date -u +"%u")
+
+          if [ $MONTH -ge 12 ] || [ $MONTH -le 2 ]; then SEASON="winter"
+          elif [ $MONTH -ge 3 ] && [ $MONTH -le 5 ]; then SEASON="spring"
+          elif [ $MONTH -ge 6 ] && [ $MONTH -le 8 ]; then SEASON="summer"
+          else SEASON="autumn"; fi
 
           echo "season=$SEASON" >> $GITHUB_OUTPUT
           echo "weekday=$WEEKDAY" >> $GITHUB_OUTPUT
           echo "month=$MONTH" >> $GITHUB_OUTPUT
 
-      - name: Select Mode (Seasonal / Pixel-Art / Weighted)
+      - name: Select Mode
         id: mode
         run: |
           RAND=$(( RANDOM % 100 ))
-
-          if [ $RAND -lt 5 ]; then
-            MODE="pixelart"
-          elif [ $RAND -lt 20 ]; then
-            MODE="seasonal"
-          else
-            MODE="weighted"
-          fi
-
+          if [ $RAND -lt 5 ]; then MODE="pixelart"
+          elif [ $RAND -lt 20 ]; then MODE="seasonal"
+          else MODE="weighted"; fi
           echo "mode=$MODE" >> $GITHUB_OUTPUT
-          echo "Selected: $MODE"
 
       - name: Determine commit count
         id: commits
@@ -56,64 +41,66 @@ jobs:
           SEASON=${{ steps.dateinfo.outputs.season }}
           WEEKDAY=${{ steps.dateinfo.outputs.weekday }}
 
-          # If pixel-art day → fixed patterns
+          # ~8% chance of a "burst day" with many commits
+          BURST=$(( RANDOM % 100 ))
+          if [ $BURST -lt 8 ]; then
+            COMMITS=$(( RANDOM % 20 + 30 ))
+            echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+            echo "BURST DAY: $COMMITS commits"
+            exit 0
+          fi
+
           if [ "$MODE" = "pixelart" ]; then
-            # Heart pattern intensity
-            COMMITS=$(( RANDOM % 8 + 20 )) # 20–28 darker
+            COMMITS=$(( RANDOM % 8 + 20 ))
             echo "commits=$COMMITS" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Seasonal modes (light/dark patterns)
           if [ "$MODE" = "seasonal" ]; then
-            if [ "$SEASON" = "winter" ]; then
-              MIN=1; MAX=10     # light winter theme
-            elif [ "$SEASON" = "summer" ]; then
-              MIN=10; MAX=35    # bright & active
-            elif [ "$SEASON" = "autumn" ]; then
-              MIN=5; MAX=20
-            else
-              MIN=7; MAX=15
-            fi
-
+            if [ "$SEASON" = "winter" ]; then MIN=1; MAX=10
+            elif [ "$SEASON" = "summer" ]; then MIN=10; MAX=35
+            elif [ "$SEASON" = "autumn" ]; then MIN=5; MAX=20
+            else MIN=7; MAX=15; fi
             COMMITS=$(( RANDOM % (MAX - MIN + 1) + MIN ))
             echo "commits=$COMMITS" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Weighted randomness (MOST DAYS)
+          # Weighted randomness
           WEIGHT=$(( RANDOM % 100 ))
+          if [ $WEIGHT -lt 60 ]; then MIN=1; MAX=5
+          elif [ $WEIGHT -lt 85 ]; then MIN=6; MAX=12
+          elif [ $WEIGHT -lt 95 ]; then MIN=13; MAX=20
+          else MIN=21; MAX=30; fi
 
-          if [ $WEIGHT -lt 60 ]; then
-            MIN=1; MAX=5
-          elif [ $WEIGHT -lt 85 ]; then
-            MIN=6; MAX=12
-          elif [ $WEIGHT -lt 95 ]; then
-            MIN=13; MAX=20
-          else
-            MIN=21; MAX=30
-          fi
-
-          # Weekly theme modifier
           if [ "$WEEKDAY" -eq 1 ]; then MIN=1; MAX=5; fi
           if [ "$WEEKDAY" -eq 5 ]; then MIN=$((MIN+5)); MAX=$((MAX+10)); fi
 
           COMMITS=$(( RANDOM % (MAX - MIN + 1) + MIN ))
-
           echo "commits=$COMMITS" >> $GITHUB_OUTPUT
           echo "Will make $COMMITS commits"
 
-      - name: Perform Commits
+      - name: Perform Commits with Random Times
         run: |
           git config --local user.email "madhiremohanreddy@gmail.com"
           git config --local user.name "ComradeMohan"
 
           TOTAL=${{ steps.commits.outputs.commits }}
+          TODAY=$(date -u +"%Y-%m-%d")
 
           for ((i=1; i<=TOTAL; i++)); do
-            echo "Commit $i - $(date -u)" > activity_log.txt
+            RAND_SEC=$(( RANDOM % 86400 ))
+            HOUR=$(( RAND_SEC / 3600 ))
+            MIN_OF_HOUR=$(( (RAND_SEC % 3600) / 60 ))
+            SEC_OF_MIN=$(( RAND_SEC % 60 ))
+            FAKE_TIME=$(printf "%s %02d:%02d:%02d" "$TODAY" $HOUR $MIN_OF_HOUR $SEC_OF_MIN)
+
+            echo "Commit $i at $FAKE_TIME" > activity_log.txt
             git add activity_log.txt
-            git commit -m "Commit $i for heatmap on $(date -u +'%Y-%m-%d')"
+
+            GIT_AUTHOR_DATE="$FAKE_TIME +0000" \
+            GIT_COMMITTER_DATE="$FAKE_TIME +0000" \
+            git commit -m "chore: activity update [$i/$TOTAL] on $TODAY"
           done
 
       - name: Push
