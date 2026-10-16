@@ -1,8 +1,7 @@
-name: Daily journal and pixel-day reminder (standalone)
+name: Daily journal and README activity
 on:
   schedule:
-    - cron: '30 0 * * *'    # 00:30 UTC: reminder if today is a planned pixel day
-    - cron: '30 17 * * *'   # 17:30 UTC: journal entry from the day's real commits
+    - cron: '30 17 * * *'   # 17:30 UTC daily
   workflow_dispatch:
     inputs:
       note:
@@ -10,7 +9,6 @@ on:
         required: false
 permissions:
   contents: write
-  issues: write
 concurrency:
   group: daily-journal
   cancel-in-progress: false
@@ -21,53 +19,86 @@ jobs:
       TARGET_BRANCH: ${{ vars.TARGET_BRANCH || github.event.repository.default_branch }}
       NOTE: ${{ github.event.inputs.note }}
       PIXEL_DATES: '2026-10-19 2026-10-20 2026-10-21 2026-10-22 2026-10-23 2026-10-26 2026-10-30 2026-11-02 2026-11-06 2026-11-16 2026-11-17 2026-11-18 2026-11-19 2026-11-20 2026-11-24 2026-12-02 2026-12-08 2026-12-14 2026-12-15 2026-12-16 2026-12-17 2026-12-18'
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
+      GIT_NAME: ${{ vars.COMMIT_NAME || 'github-actions[bot]' }}
+      GIT_EMAIL: ${{ vars.COMMIT_EMAIL || '41898282+github-actions[bot]@users.noreply.github.com' }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ vars.TARGET_BRANCH || github.event.repository.default_branch }}
           fetch-depth: 0
 
-      - name: Pixel-day reminder (issue only, no commits)
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 0 * * *'
+      - name: README commits (50 on pixel dates, 1-20 otherwise)
         run: |
           set -euo pipefail
           TODAY=$(date -u +%F)
-          case " $PIXEL_DATES " in *" $TODAY "*) ;; *) echo "$TODAY is not a pixel day."; exit 0;; esac
-          TITLE="Pixel day ${TODAY}: ship something real"
-          FOUND=$(gh issue list --state all --search "\"$TITLE\" in:title" --json number --jq length)
-          [ "$FOUND" -eq 0 ] || { echo "Reminder already exists."; exit 0; }
-          gh issue create --title "$TITLE" --body "Today is a planned pixel on your contribution heatmap plan. Do real work today (docs, tests, a fix, a DSA write-up) and push it. Nothing is auto-committed; the graph will only show what you genuinely do. Planned samples do not guarantee a particular shade."
 
-      - name: Write journal entry (only if there is real work)
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 17 * * *'
+          if grep -q "Last run: ${TODAY}" README.md 2>/dev/null; then
+            echo "README already updated for $TODAY."; exit 0
+          fi
+
+          case " $PIXEL_DATES " in
+            *" $TODAY "*) N=50 ;;
+            *) N=$(( RANDOM % 20 + 1 )) ;;
+          esac
+          echo "Making $N commits for $TODAY"
+
+          touch README.md
+          grep -q 'ACTIVITY:START' README.md || \
+            printf '\n<!-- ACTIVITY:START -->\n<!-- ACTIVITY:END -->\n' >> README.md
+
+          TOTAL=$(sed -n 's/.*Total commits logged: \([0-9]*\).*/\1/p' README.md | head -1)
+          TOTAL=${TOTAL:-0}
+
+          git config user.name "$GIT_NAME"
+          git config user.email "$GIT_EMAIL"
+
+          for i in $(seq 1 "$N"); do
+            TOTAL=$((TOTAL + 1))
+            python3 - "$TODAY" "$i" "$N" "$TOTAL" <<'PY'
+          import re, sys
+          today, i, n, total = sys.argv[1:5]
+          block = (
+              "<!-- ACTIVITY:START -->\n"
+              f"- Last run: {today}\n"
+              f"- Commits today: {i}/{n}\n"
+              f"- Total commits logged: {total}\n"
+              "<!-- ACTIVITY:END -->"
+          )
+          text = open("README.md").read()
+          text = re.sub(r"<!-- ACTIVITY:START -->.*?<!-- ACTIVITY:END -->", block, text, flags=re.S)
+          open("README.md", "w").write(text)
+          PY
+            git add README.md
+            git commit -q -m "chore(readme): activity update ${i}/${N} for ${TODAY}"
+          done
+
+      - name: Write journal entry
         run: |
           set -euo pipefail
           TODAY=$(date -u +%F)
           FILE="journal/${TODAY}.md"
           [ -f "$FILE" ] && { echo "Entry for $TODAY exists."; exit 0; }
-          LOG=$(git log --since="${TODAY} 00:00:00 +0000" --no-merges --invert-grep --grep='^docs(journal):' --pretty='- %h %s (%an)')
-          if [ -z "$LOG" ] && [ -z "${NOTE:-}" ]; then echo "No work recorded today; skipping."; exit 0; fi
-          FILES=$(git log --since="${TODAY} 00:00:00 +0000" --no-merges --invert-grep --grep='^docs(journal):' --name-only --pretty=format: | sort -u | grep -v '^$' | grep -v '^journal/' | sed 's/^/- /' || true)
+          SINCE="${TODAY} 00:00:00 +0000"
+          AUTO=$(git log --since="$SINCE" --no-merges --grep='^chore(readme): activity' --pretty='%h' | wc -l)
+          LOG=$(git log --since="$SINCE" --no-merges --invert-grep --grep='^docs(journal):' --grep='^chore(readme):' --pretty='- %h %s (%an)')
+          FILES=$(git log --since="$SINCE" --no-merges --invert-grep --grep='^docs(journal):' --grep='^chore(readme):' --name-only --pretty=format: | sort -u | grep -v '^$' | grep -v '^journal/' | sed 's/^/- /' || true)
           mkdir -p journal
           {
             echo "# Development journal: ${TODAY}"; echo
-            echo "## Commits today"; echo "${LOG:-_none_}"; echo
+            echo "## Summary"; echo "- README activity commits today: ${AUTO}"; echo
+            echo "## Other commits today"; echo "${LOG:-_none_}"; echo
             echo "## Files touched"; echo "${FILES:-_none_}"; echo
             [ -n "${NOTE:-}" ] && { echo "## Notes"; echo "$NOTE"; echo; }
           } > "$FILE"
 
-      - name: Commit and push journal
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 17 * * *'
-        env:
-          GIT_NAME: ${{ vars.COMMIT_NAME || 'github-actions[bot]' }}
-          GIT_EMAIL: ${{ vars.COMMIT_EMAIL || '41898282+github-actions[bot]@users.noreply.github.com' }}
+      - name: Commit journal and push everything
         run: |
           set -euo pipefail
+          git config user.name "$GIT_NAME"
+          git config user.email "$GIT_EMAIL"
           git add journal
-          git diff --cached --quiet && { echo "No changes."; exit 0; }
-          git config user.name "$GIT_NAME"; git config user.email "$GIT_EMAIL"
-          git commit -m "docs(journal): daily development summary for $(date -u +%F)"
+          if ! git diff --cached --quiet; then
+            git commit -q -m "docs(journal): daily development summary for $(date -u +%F)"
+          fi
           git pull --rebase origin "$TARGET_BRANCH"
           git push origin "HEAD:${TARGET_BRANCH}"
